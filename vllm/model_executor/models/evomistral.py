@@ -53,7 +53,7 @@ class EvoMistralModel(MistralModel):
             hidden_states, residual = layer(
                 positions,
                 hidden_states * scale,
-                kv_caches[idx],
+                kv_caches[layer_ix],
                 input_metadata,
                 residual,
             )
