@@ -29,6 +29,7 @@ _MODELS = {
     # For decapoda-research/llama-*
     "LLaMAForCausalLM": ("llama", "LlamaForCausalLM"),
     "MistralForCausalLM": ("mistral", "MistralForCausalLM"),
+    "EvoMistralForCausalLM": ("evomistral", "EvoMistralForCausalLM"),
     "MixtralForCausalLM": ("mixtral", "MixtralForCausalLM"),
     "QuantMixtralForCausalLM": ("mixtral_quant", "MixtralForCausalLM"),
     # transformers's mpt class has lower case
