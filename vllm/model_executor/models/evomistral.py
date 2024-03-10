@@ -7,21 +7,20 @@ from vllm.config import LoRAConfig
 from vllm.model_executor.layers.linear import LinearMethodBase
 from transformers import PretrainedConfig
 
-from .mistral import (
-    MistralModel, 
-    KVCache, 
-    InputMetadata, 
-    ParallelLMHead, 
-    SamplerOutput, 
-    SamplingMetadata, 
-    DEFAULT_VOCAB_PADDING_SIZE, 
-    Sampler, 
+from .llama import (
+    KVCache,
+    InputMetadata,
+    LlamaModel,
+    ParallelLMHead,
+    DEFAULT_VOCAB_PADDING_SIZE,
+    Sampler,
+    SamplingMetadata,
+    SamplerOutput,
     hf_model_weights_iterator,
     default_weight_loader,
 )
 
-
-class EvoMistralModel(MistralModel):
+class EvoMistralModel(LlamaModel):
     def __init__(
         self,
         config: PretrainedConfig,
@@ -53,7 +52,7 @@ class EvoMistralModel(MistralModel):
             hidden_states, residual = layer(
                 positions,
                 hidden_states * scale,
-                kv_caches[layer_ix],
+                kv_caches[idx],
                 input_metadata,
                 residual,
             )
@@ -61,6 +60,7 @@ class EvoMistralModel(MistralModel):
         return hidden_states
     
 
+# copied from llama.LlamaForCausalLM but replaced LlamaModel to EvoMistralModel
 class EvoMistralForCausalLM(nn.Module):
     supports_lora = True
 
@@ -73,9 +73,7 @@ class EvoMistralForCausalLM(nn.Module):
         super().__init__()
         self.config = config
         self.linear_method = linear_method
-        self.model = EvoMistralModel(config,
-                                  linear_method,
-                                  lora_config=lora_config)
+        self.model = EvoMistralModel(config, linear_method, lora_config=lora_config)
         unpadded_vocab_size = config.vocab_size
         if lora_config:
             unpadded_vocab_size += lora_config.lora_extra_vocab_size
@@ -127,6 +125,11 @@ class EvoMistralForCausalLM(nn.Module):
         for name, loaded_weight in hf_model_weights_iterator(
                 model_name_or_path, cache_dir, load_format, revision):
             if "rotary_emb.inv_freq" in name:
+                continue
+            if ("rotary_emb.cos_cached" in name
+                    or "rotary_emb.sin_cached" in name):
+                # Models trained using ColossalAI may include these tensors in
+                # the checkpoint. Skip them.
                 continue
             for (param_name, weight_name, shard_id) in stacked_params_mapping:
                 if weight_name not in name:
