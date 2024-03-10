@@ -48,7 +48,7 @@ class EvoMistralModel(LlamaModel):
         # for i in range(len(self.layers)):
             layer = self.layers[layer_ix]
             scale = self.input_scales[layer_ix]
-            
+            print(layer_ix, idx, len(kv_caches))
             hidden_states, residual = layer(
                 positions,
                 hidden_states * scale,
