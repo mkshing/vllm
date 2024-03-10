@@ -264,11 +264,10 @@ class ModelConfig:
                    total_num_kv_heads // parallel_config.tensor_parallel_size)
 
     def get_num_layers(self, parallel_config: "ParallelConfig") -> int:
+        if self.hf_config.model_type == "evomistral":
+            return self.hf_config.num_hops
         total_num_hidden_layers = self.hf_config.num_hidden_layers
         return total_num_hidden_layers // parallel_config.pipeline_parallel_size
-
-    def get_num_hops(self, parallel_config: "ParallelConfig") -> int:
-        return self.hf_config.num_hops
 
 
 class CacheConfig:
