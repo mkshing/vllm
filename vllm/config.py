@@ -267,6 +267,9 @@ class ModelConfig:
         total_num_hidden_layers = self.hf_config.num_hidden_layers
         return total_num_hidden_layers // parallel_config.pipeline_parallel_size
 
+    def get_num_hops(self, parallel_config: "ParallelConfig") -> int:
+        return self.hf_config.num_hops
+
 
 class CacheConfig:
     """Configuration for the KV cache.
