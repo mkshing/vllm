@@ -45,7 +45,6 @@ class EvoMistralModel(LlamaModel):
         hidden_states = self.embed_tokens(input_ids)
         residual = None
         for idx, layer_ix in enumerate(self.input_layers):
-            print(hidden_states.dtype)
             layer = self.layers[layer_ix]
             scale = self.input_scales[layer_ix]
             hidden_states, residual = layer(
