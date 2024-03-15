@@ -46,7 +46,7 @@ class EvoMistralModel(LlamaModel):
         residual = None
         for idx, layer_ix in enumerate(self.input_layers):
             layer = self.layers[layer_ix]
-            scale = self.input_scales[idx]
+            scale = self.input_scales[idx].to(hidden_states.device)
             hidden_states, residual = layer(
                 positions,
                 hidden_states * scale,
